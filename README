@@ -1,0 +1,95 @@
+The Small Fonts Package
+
+
+Introduction
+
+5x9 and 5x10 are two X11 fonts intended for use with xterm or other programs
+requiring readable small fonts.  At only 5 pixels wide, they are particularly
+well suited to small laptop screens, allowing two 80 column windows side
+by side on an 800x600 screen (albeit with no room for window frames), or 
+three windows across with room to spare on a 1280x1024 screen, with room to
+spare.
+
+The fonts implement VT100 line-drawing characters.  Bolding is not directly
+supported; xterm does adequate bolding by duplicating pixels.
+
+
+Editing bitmaps
+
+Two scripts, bdfdecode.awk and bdfencode.awk are provided to turn BDF
+files into character mapped bitmap files and vice-versa.  The character 
+mapped files are simply BDF files with the bits encoded as one bit per
+character instead of as hex, allowing easy editing of the bitmap with
+any text editor.
+
+Editing the bitmaps in character mapped files is fairly straightforward.  
+Alphanumeric characters indicate a set bit, spaces or special characters
+indicate a clear bit.  Ensure the number of lines between the BITMAP and 
+ENDCHAR lines is correct. Characters outside the expected width of the
+bitmap are ignored.
+
+bdfdecode.awk places '.'s instead of spaces on the baseline of the
+character for reference, but these don't need to be maintained (although
+it's easier to see what you're doing if they are).
+
+
+Compiling fonts:
+
+Modern X servers use PCF files, usually gzipped.  To convert a the 
+5x10 BDF file to a gzipped PCF:
+
+	bdftopcf 5x10.bdf | gzip > 5x10.pcf.gz
+
+Keep the BDF files, as there may not be a nice simple tool handy to
+re-generate them from the PCF file.
+
+
+Installing
+
+Find a location in your X11 fonts tree structure to place the fonts,
+e.g. /usr/share/X11/fonts/misc.  Ensure that the directory is included;
+if running the X Font Server (xfs), the list is in the "catalogue =" 
+directive of the xfs configuration file -- see the xfs manual page.
+If not, the list will be in the FontPath directive in see xorg.conf.
+
+Place the 5x9.pcf.gz and 5x10.pcf.gz in the directory.  Issue the command 
+'mkfontdir /usr/share/X11/fonts/misc' to re-read the font files and rebuild
+the fonts.dir file in the directory (assuming the directory is
+/usr/share/X11/fonts/misc).
+
+If required, add the following lines to the fonts.alias file in the
+directory:
+
+5x9          -gnu-fixed-medium-r-normal--9-100-75-75-c-50-iso8859-1
+5x10         -gnu-fixed-medium-r-normal--10-100-75-75-c-50-iso8859-1
+
+This will allow the fonts to be referred to by the names '5x9' & '5x10',
+e.g. 'xterm -fn 5x10'.
+
+After completing these changes, reload xfs (on RedHat derived systems,
+'service xfs reload'; others just killall -HUP xfs).  If not using xfs,
+restart X to pick up the new fonts.
+
+The file "install.sh" will perform the above steps automatically.  If it
+can not correctly identify the appropriate fonts directory, specify this
+on the command line.
+
+
+Xterm resources
+
+Xterm can be configured to use a font by default by setting the xterm.font
+resource to '5x10' or '5x9' (assuming you have created the appropriate 
+entries in the fonts.alias file).  See the xterm documentation on how to
+change the xterm font menus.
+
+
+Author and Copyright
+
+The small fonts are public domain.  They are adapted from the example at
+http://chem.skku.ac.kr/~wkpark/project/webfed/trash/bdftofon/5x10.bdf
+by Don Stokes, Knossos Neworks Ltd (http://www.knossos.net.nz/) to
+improve consistency and readability.  The original file is provided as
+5x10orig.bdf for comparison. 
+
+The current version is available at
+http://www.knossos.net.nz/downloads/smallfont-1.0.tgz.
